@@ -1,0 +1,46 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #111827;
+}
+.screen {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    width: 100%;
+}
+.active {
+    display: flex;
+    opacity: 1;
+}
+.genre-checkbox:checked + label {
+    background-color: #F59E0B;
+    border-color: #F59E0B;
+    color: #111827;
+    transform: scale(1.05);
+}
+.genre-checkbox + label {
+    transition: all 0.2s ease-in-out;
+}
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top: 4px solid #F59E0B;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.card-enter {
+    animation: card-enter-animation 0.5s ease-out forwards;
+}
+@keyframes card-enter-animation {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
