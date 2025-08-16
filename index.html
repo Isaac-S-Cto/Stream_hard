@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineRoleta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+        }
+        .screen {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            width: 100%;
+        }
+        .active {
+            display: flex;
+            opacity: 1;
+        }
+        .genre-checkbox:checked + label {
+            background-color: #F59E0B;
+            border-color: #F59E0B;
+            color: #111827;
+            transform: scale(1.05);
+        }
+        .genre-checkbox + label {
+            transition: all 0.2s ease-in-out;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid #F59E0B;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .card-enter {
+            animation: card-enter-animation 0.5s ease-out forwards;
+        }
+        @keyframes card-enter-animation {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-x-hidden">
+
+    <!-- Status do Usuário -->
+    <div id="user-status" class="absolute top-4 right-4 md:top-6 md:right-6 text-right hidden z-10 flex items-center gap-3">
+        <p id="user-name" class="text-sm md:text-base"></p>
+        <button id="gallery-button" title="Ver filmes assistidos">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500 hover:text-amber-400 transition-colors"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button id="logout-button" class="text-xs text-red-500 hover:underline">Sair</button>
+    </div>
+
+    <!-- Tela 1: Boas-vindas / Login -->
+    <div id="welcomeScreen" class="screen active flex-col text-center items-center justify-center w-full max-w-lg mx-auto">
+        <div class="mb-8">
+            <svg class="w-24 h-24 mx-auto" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 100C77.6142 100 100 77.6142 100 50C100 22.3858 77.6142 0 50 0C22.3858 0 0 22.3858 0 50C0 77.6142 22.3858 100 50 100Z" fill="url(#paint0_linear_101_2)"/><path d="M69.1667 50L41.6667 66.1667V33.8333L69.1667 50Z" fill="white"/><defs><linearGradient id="paint0_linear_101_2" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse"><stop stop-color="#F59E0B"/><stop offset="1" stop-color="#EF4444"/></linearGradient></defs></svg>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-red-500">CineRoleta</h1>
+        <p class="text-gray-400 mb-8 max-w-md">Cansado de escolher? Deixe a sorte decidir por você. A sua noite de cinema perfeita está a um clique de distância.</p>
+        <div id="login-options" class="w-full max-w-sm"><button id="google-login-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105 w-full flex items-center justify-center mb-4"><svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.902,36.631,44,30.836,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>Entrar com Google</button><button id="guest-login-button" class="text-gray-400 hover:text-white text-sm">Continuar como visitante</button><p id="login-error" class="text-yellow-500 text-sm mt-4 h-5">O login com Google é simulado.</p></div>
+    </div>
+
+    <!-- Tela 2: Preferências -->
+    <div id="preferencesScreen" class="screen flex-col items-center justify-center w-full max-w-4xl mx-auto">
+        <h2 class="text-3xl sm:text-4xl font-bold mb-2 text-center">Configure o seu perfil</h2>
+        <p class="text-gray-400 mb-8 md:mb-12 text-center">Quanto mais detalhes, melhores as sugestões.</p>
+        <div class="w-full space-y-8 md:space-y-10">
+            <div><h3 class="text-xl font-semibold mb-4 text-left">Quais géneros você mais gosta?</h3><div id="genre-selection" class="flex flex-wrap gap-3 justify-start"><input type="checkbox" id="genre-acao" class="hidden genre-checkbox" value="28"><label for="genre-acao" class="cursor-pointer bg-gray-800 border-2 border-gray-700 rounded-full px-5 py-2 text-sm font-medium">Ação</label><input type="checkbox" id="genre-comedia" class="hidden genre-checkbox" value="35"><label for="genre-comedia" class="cursor-pointer bg-gray-800 border-2 border-gray-700 rounded-full px-5 py-2 text-sm font-medium">Comédia</label><input type="checkbox" id="genre-drama" class="hidden genre-checkbox" value="18"><label for="genre-drama" class="cursor-pointer bg-gray-800 border-2 border-gray-700 rounded-full px-5 py-2 text-sm font-medium">Drama</label><input type="checkbox" id="genre-scifi" class="hidden genre-checkbox" value="878"><label for="genre-scifi" class="cursor-pointer bg-gray-800 border-2 border-gray-700 rounded-full px-5 py-2 text-sm font-medium">Ficção Científica</label><input type="checkbox" id="genre-terror" class="hidden genre-checkbox" value="27"><label for="genre-terror" class="cursor-pointer bg-gray-800 border-2 border-gray-700 rounded-full px-5 py-2 text-sm font-medium">Terror</label><input type="checkbox" id="genre-romance" class="hidden genre-checkbox" value="10749"><label for="genre-romance" class="cursor-pointer bg-gray-800 border-2 border-gray-700 rounded-full px-5 py-2 text-sm font-medium">Romance</label></div></div>
+            <div class="relative">
+                <h3 class="text-xl font-semibold mb-4 text-left">Quais são os seus filmes de referência?</h3>
+                <p class="text-gray-400 mb-4 text-sm">Clique nos pósteres para selecionar (máx. 3), ou procure um filme específico.</p>
+                <div id="movie-grid-suggestions" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6"></div>
+                <div id="selected-movies-container" class="hidden"></div>
+                <input type="text" id="movie-search-input" placeholder="Não encontrou o seu favorito? Procure aqui..." class="w-full bg-gray-800 border-2 border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors">
+                <div id="movie-search-results" class="absolute top-full left-0 right-0 bg-gray-800 border-2 border-gray-700 rounded-lg mt-1 z-20 max-h-60 overflow-y-auto custom-scrollbar"></div>
+            </div>
+        </div>
+        <button id="go-to-roulette-button" class="mt-12 bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-600 hover:to-red-700 text-white font-bold py-4 px-10 rounded-full transition-transform transform hover:scale-105 w-full max-w-xs text-lg">Salvar e Ir para a Roleta</button>
+    </div>
+
+    <!-- Tela 3: Roleta -->
+    <div id="rouletteScreen" class="screen flex-col items-center justify-center w-full max-w-md mx-auto min-h-full"><div id="roulette-initial" class="flex flex-col items-center justify-center text-center"><h2 class="text-3xl sm:text-4xl font-bold mb-4">Pronto para a surpresa?</h2><p class="text-gray-400 mb-8">Você tem <span id="spins-left-text" class="font-bold text-amber-500 text-lg">3</span> tentativas.</p><button id="spinButton" class="bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-600 hover:to-red-700 text-white font-black text-3xl w-44 h-44 sm:w-56 sm:h-56 rounded-full transition-transform transform hover:scale-105 shadow-lg shadow-amber-500/20 flex items-center justify-center">GIRAR!</button></div><div id="loading" class="hidden flex-col items-center"><div class="spinner mb-6"></div><p class="text-lg text-gray-300">A procurar o filme perfeito...</p></div><div id="result" class="hidden flex-col items-center w-full"></div></div>
+
+    <!-- Tela 4: Galeria -->
+    <div id="galleryScreen" class="screen flex-col items-center w-full max-w-5xl mx-auto"><div class="w-full flex justify-between items-center mb-8"><h2 class="text-3xl sm:text-4xl font-bold">Filmes que Você Já Viu</h2><button id="back-to-prefs-button" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors">Voltar</button></div><div id="gallery-grid" class="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"></div></div>
+
+    <!-- Scripts do App -->
+    <script type="module">
+        function main() {
+            // --- ESTADO DA APLICAÇÃO ---
+            let currentUser = null;
+            let spinsLeft = 3;
+            const watchedMovies = new Map();
+            let searchTimeout;
+            let suggestionPool = [];
+            let suggestionPoolIndex = 0;
+
+            // --- ELEMENTOS DA UI ---
+            const allElements = {
+                googleLoginButton: document.getElementById('google-login-button'), guestLoginButton: document.getElementById('guest-login-button'),
+                logoutButton: document.getElementById('logout-button'), userStatusDiv: document.getElementById('user-status'),
+                userNameP: document.getElementById('user-name'), galleryButton: document.getElementById('gallery-button'),
+                goToRouletteButton: document.getElementById('go-to-roulette-button'), spinButton: document.getElementById('spinButton'),
+                resultContainer: document.getElementById('result'), genreSelectionContainer: document.getElementById('genre-selection'),
+                movieSearchInput: document.getElementById('movie-search-input'), movieSearchResults: document.getElementById('movie-search-results'),
+                selectedMoviesContainer: document.getElementById('selected-movies-container'), spinsLeftText: document.getElementById('spins-left-text'),
+                backToPrefsButton: document.getElementById('back-to-prefs-button'), galleryGrid: document.getElementById('gallery-grid'),
+                movieGridSuggestions: document.getElementById('movie-grid-suggestions')
+            };
+
+            // --- LÓGICA DE NAVEGAÇÃO E ESTADO ---
+            function showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+                const screenToShow = document.getElementById(screenId);
+                if (screenToShow) screenToShow.classList.add('active');
+            }
+            
+            function resetSpins() {
+                spinsLeft = 3;
+                allElements.spinsLeftText.textContent = spinsLeft;
+                document.getElementById('roulette-initial').style.display = 'flex';
+                allElements.resultContainer.style.display = 'none';
+            }
+
+            // --- LÓGICA DE AUTENTICAÇÃO (SIMULADA) ---
+            function updateUIForUser(user) {
+                if (user) {
+                    currentUser = user;
+                    currentUser.preferences = { genres: [], favoriteMovies: [] };
+                    allElements.userStatusDiv.classList.remove('hidden');
+                    const displayName = user.displayName ? user.displayName.split(' ')[0] : 'Visitante';
+                    allElements.userNameP.textContent = `Olá, ${displayName}!`;
+                    resetSpins();
+                    watchedMovies.clear();
+                    loadMovieSuggestions();
+                    showScreen('preferencesScreen');
+                } else {
+                    currentUser = null;
+                    allElements.userStatusDiv.classList.add('hidden');
+                    showScreen('welcomeScreen');
+                }
+            }
+
+            // --- LÓGICA DE PREFERÊNCIAS E BUSCA INTERATIVA ---
+            function savePreferences() {
+                if (!currentUser) return;
+                const selectedGenres = Array.from(allElements.genreSelectionContainer.querySelectorAll('.genre-checkbox:checked')).map(cb => cb.value);
+                currentUser.preferences.genres = selectedGenres;
+            }
+
+            function addFavoriteMovie(movie, elementToReplace = null) {
+                if (currentUser.preferences.favoriteMovies.length < 3 && !currentUser.preferences.favoriteMovies.some(m => m.id === movie.id)) {
+                    currentUser.preferences.favoriteMovies.push(movie);
+                    if (elementToReplace) {
+                        replaceSuggestionInGrid(elementToReplace);
+                    }
+                }
+            }
+
+            function replaceSuggestionInGrid(elementToReplace) {
+                const nextMovie = suggestionPool[suggestionPoolIndex];
+                suggestionPoolIndex++;
+                if (nextMovie) {
+                    const newElement = document.createElement('div');
+                    newElement.innerHTML = createMovieSuggestionHTML(nextMovie);
+                    elementToReplace.replaceWith(newElement.firstChild);
+                } else {
+                    elementToReplace.style.display = 'none';
+                }
+            }
+            
+            // --- LÓGICA DA ROLETA (TMDb API) ---
+            const API_KEY = 'api_key=1cf50e6248dc270629e802686245c2c8';
+            const BASE_URL = 'https://api.themoviedb.org/3';
+            const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+            const LOGO_URL = 'https://image.tmdb.org/t/p/w92';
+
+            async function fetchFromApi(url) {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Falha na comunicação com a API de filmes.');
+                return response.json();
+            }
+
+            function createMovieSuggestionHTML(movie) {
+                return `<div class="movie-suggestion transition-all duration-200 rounded-lg" data-movie-id="${movie.id}">
+                            <img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}" title="${movie.title}" data-movie='${JSON.stringify(movie)}' class="rounded-lg shadow-lg aspect-[2/3] object-cover w-full h-full cursor-pointer hover:scale-105">
+                        </div>`;
+            }
+
+            async function loadMovieSuggestions() {
+                try {
+                    const data1 = await fetchFromApi(`${BASE_URL}/movie/top_rated?${API_KEY}&language=pt-BR&page=1`);
+                    const data2 = await fetchFromApi(`${BASE_URL}/movie/top_rated?${API_KEY}&language=pt-BR&page=2`);
+                    suggestionPool = [...data1.results, ...data2.results].filter(m => m.poster_path);
+                    suggestionPoolIndex = 12;
+                    allElements.movieGridSuggestions.innerHTML = suggestionPool.slice(0, 12).map(createMovieSuggestionHTML).join('');
+                } catch (error) {
+                    console.error("Erro ao carregar sugestões de filmes:", error);
+                }
+            }
+
+            async function getRecommendations(movieIds) {
+                const promises = movieIds.map(id => fetchFromApi(`${BASE_URL}/movie/${id}/recommendations?${API_KEY}&language=pt-BR`));
+                const results = await Promise.all(promises);
+                return results.flatMap(data => data.results);
+            }
+            
+            async function getWatchProviders(movieId) {
+                const data = await fetchFromApi(`${BASE_URL}/movie/${movieId}/watch/providers?${API_KEY}`);
+                return data.results.BR?.flatrate?.map(p => ({ logo_path: p.logo_path, provider_name: p.provider_name })) || [];
+            }
+
+            async function spinRoulette() {
+                if (spinsLeft <= 0) return;
+                spinsLeft--;
+
+                document.getElementById('roulette-initial').style.display = 'none';
+                document.getElementById('loading').style.display = 'flex';
+                allElements.resultContainer.style.display = 'none';
+
+                try {
+                    let candidateMovies = [];
+                    const { genres, favoriteMovies } = currentUser.preferences;
+
+                    if (genres.length > 0) {
+                        const data = await fetchFromApi(`${BASE_URL}/discover/movie?sort_by=popularity.desc&${API_KEY}&language=pt-BR&with_genres=${genres.join(',')}`);
+                        candidateMovies.push(...data.results);
+                    }
+                    if (favoriteMovies.length > 0) {
+                        const movieIds = favoriteMovies.map(m => m.id);
+                        const recommendations = await getRecommendations(movieIds);
+                        candidateMovies.push(...recommendations);
+                    }
+                    if (candidateMovies.length === 0) {
+                        const data = await fetchFromApi(`${BASE_URL}/movie/popular?${API_KEY}&language=pt-BR`);
+                        candidateMovies.push(...data.results);
+                    }
+
+                    const uniqueMovies = Array.from(new Map(candidateMovies.map(m => [m.id, m])).values());
+                    const validMovies = uniqueMovies.filter(m => m.overview && m.poster_path && !watchedMovies.has(m.id));
+
+                    if (validMovies.length === 0) throw new Error("Não foram encontrados mais filmes novos com esses critérios.");
+
+                    const movie = validMovies[Math.floor(Math.random() * validMovies.length)];
+                    const providers = await getWatchProviders(movie.id);
+                    renderResultCard(movie, providers);
+
+                } catch (error) {
+                    allElements.resultContainer.innerHTML = `<div class="text-center"><p class="text-red-500 mb-4">${error.message}</p><button id="back-to-prefs" class="bg-gray-700 text-white font-bold py-2 px-4 rounded-full">Voltar às Preferências</button></div>`;
+                    document.getElementById('back-to-prefs').addEventListener('click', () => showScreen('preferencesScreen'));
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                    allElements.resultContainer.style.display = 'flex';
+                }
+            }
+            
+            function renderResultCard(movie, providers) {
+                let providersHtml = providers.length > 0 ? `<div class="mt-4"><p class="text-sm font-semibold mb-2">Onde Assistir:</p><div class="flex justify-center flex-wrap gap-3">${providers.map(p => `<img src="${LOGO_URL}${p.logo_path}" alt="${p.provider_name}" class="w-10 h-10 rounded-lg" title="${p.provider_name}">`).join('')}</div></div>` : '<p class="text-sm text-gray-400 mt-4">Não disponível em streaming no Brasil.</p>';
+                allElements.resultContainer.innerHTML = `<div class="bg-gray-800 rounded-2xl shadow-lg w-full max-w-sm overflow-hidden card-enter"><img src="${IMG_URL}${movie.poster_path}" alt="Póster de ${movie.title}" class="w-full h-auto object-cover"><div class="p-5 text-center"><h3 class="text-2xl font-bold mb-2">${movie.title}</h3><p class="text-gray-300 text-sm mb-4 max-h-32 overflow-y-auto custom-scrollbar">${movie.overview}</p>${providersHtml}</div></div><div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full mt-6"><button id="watched-button" data-movie-id="${movie.id}" class="bg-gray-700 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-full transition-colors w-full sm:w-auto">Já Assisti</button>${spinsLeft > 0 ? `<button id="spin-again-button" class="bg-gradient-to-r from-amber-500 to-red-600 text-white font-bold py-3 px-6 rounded-full w-full sm:w-auto">Girar (${spinsLeft})</button>` : ''}</div>${spinsLeft === 0 ? `<p class="mt-6 bg-green-800 text-white font-bold py-3 px-8 rounded-full">Esta é a sua escolha! Bom filme!</p>` : ''}`;
+                if (spinsLeft > 0) document.getElementById('spin-again-button').addEventListener('click', spinRoulette);
+                document.getElementById('watched-button').addEventListener('click', (e) => {
+                    const movieId = parseInt(e.currentTarget.dataset.movieId);
+                    if (!watchedMovies.has(movieId)) watchedMovies.set(movieId, movie);
+                    spinRoulette();
+                });
+            }
+
+            // --- ATIVAÇÃO DOS EVENT LISTENERS ---
+            allElements.googleLoginButton.addEventListener('click', () => updateUIForUser({ displayName: 'Alex', isAnonymous: false }));
+            allElements.guestLoginButton.addEventListener('click', () => updateUIForUser({ displayName: 'Visitante', isAnonymous: true }));
+            allElements.logoutButton.addEventListener('click', () => updateUIForUser(null));
+            allElements.goToRouletteButton.addEventListener('click', () => { savePreferences(); resetSpins(); showScreen('rouletteScreen'); });
+            allElements.spinButton.addEventListener('click', spinRoulette);
+            allElements.galleryButton.addEventListener('click', () => {
+                allElements.galleryGrid.innerHTML = Array.from(watchedMovies.values()).map(movie => `<img src="${IMG_URL}${movie.poster_path}" alt="${movie.title}" class="rounded-lg shadow-lg aspect-[2/3] object-cover" title="${movie.title}">`).join('') || '<p class="col-span-full text-center text-gray-400">Você ainda não marcou nenhum filme como assistido.</p>';
+                showScreen('galleryScreen');
+            });
+            allElements.backToPrefsButton.addEventListener('click', () => showScreen('preferencesScreen'));
+            allElements.movieSearchInput.addEventListener('keyup', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value;
+                if (query.length < 3) { allElements.movieSearchResults.innerHTML = ''; return; }
+                searchTimeout = setTimeout(async () => {
+                    const data = await fetchFromApi(`${BASE_URL}/search/movie?${API_KEY}&query=${encodeURIComponent(query)}&language=pt-BR`);
+                    allElements.movieSearchResults.innerHTML = data.results.slice(0, 5).map(movie => `<div class="p-2 flex items-center gap-3 hover:bg-gray-700 cursor-pointer search-result-item" data-movie='${JSON.stringify(movie)}'><img src="${IMG_URL}${movie.poster_path}" class="w-10 h-14 object-cover rounded"><p>${movie.title} (${new Date(movie.release_date).getFullYear()})</p></div>`).join('');
+                }, 300);
+            });
+            allElements.movieSearchResults.addEventListener('click', (e) => {
+                const item = e.target.closest('.search-result-item');
+                if (item) { addFavoriteMovie(JSON.parse(item.dataset.movie)); allElements.movieSearchInput.value = ''; allElements.movieSearchResults.innerHTML = ''; }
+            });
+            allElements.movieGridSuggestions.addEventListener('click', (e) => {
+                const suggestionDiv = e.target.closest('.movie-suggestion');
+                if (suggestionDiv) {
+                    addFavoriteMovie(JSON.parse(suggestionDiv.querySelector('img').dataset.movie), suggestionDiv);
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', main);
+    </script>
+</body>
+</html>
